@@ -10,11 +10,11 @@ pipeline {
             when { branch 'dev' } 
             steps {
                 script {
-                    sh 'python ingest.py'
-                    sh 'python train.py'
-                    sh 'python deploy.py'
+                    sh 'python3 ingest.py'
+                    sh 'python3 train.py'
+                    sh 'python3 deploy.py'
                     try {
-                        sh 'python test_model.py'
+                        sh 'python3 test_model.py'
                     } catch (Exception e) {
                         sendEmail()
                         error "Dev Testing failed"
@@ -27,7 +27,7 @@ pipeline {
             when { branch 'main' }
             steps {
                 script {
-                    sh 'python test_model.py'
+                    sh 'python3 test_model.py'
                 }
             }
         }
@@ -36,7 +36,7 @@ pipeline {
             when { buildingTag() } 
             steps {
                 script {
-                    sh 'python deploy.py'
+                    sh 'python3 deploy.py'
                 }
             }
         }
