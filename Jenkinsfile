@@ -10,14 +10,19 @@ pipeline {
             when { branch 'dev' } 
             steps {
                 script {
-                    sh 'python ingest.py'
-                    sh 'python train.py'
-                    sh 'python deploy.py'
-                    try {
-                        sh 'python test_model.py'
-                    } catch (Exception e) {
-                        sendEmail()
-                        error "Dev Testing failed"
+                    // Windows commands (bat)
+                    bat 'python ingest.py'
+                    bat 'python train.py'
+                    
+                    // Shared Library steps
+                    deployModel(alias: 'Challenger', port: 5001)
+                    
+                    def passed = testModel(port: 5001, threshold: 0.85)
+                    
+                    if (passed) {
+                        echo "Testing Passed!"
+                    } else {
+                        error "Dev Testing failed - Accuracy too low"
                     }
                 }
             }
@@ -27,16 +32,7 @@ pipeline {
             when { branch 'main' }
             steps {
                 script {
-                    sh 'python test_model.py'
-                }
-            }
-        }
-
-        stage('Prod Pipeline') {
-            when { buildingTag() } 
-            steps {
-                script {
-                    sh 'python deploy.py'
+                    bat 'python test_model.py'
                 }
             }
         }
